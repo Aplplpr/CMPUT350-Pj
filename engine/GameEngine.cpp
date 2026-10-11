@@ -106,17 +106,6 @@ void GameEngine::Run() {
             if (event->is<sf::Event::Closed>()) {
                 mWindow->close();
             }
-            else if (const auto* keyPressed =
-                        event->getIf<sf::Event::TextEntered>()) {
-
-                if (keyPressed->unicode < 128) {
-                    char key = static_cast<char>(keyPressed->unicode);
-
-                    for (auto &gameObject : mGameObjects) {
-                        gameObject->HandleKeyEvent(&mGameContext, key);
-                    }
-                }
-            }
         }
 
         // 3. Update game objects

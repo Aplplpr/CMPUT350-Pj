@@ -13,18 +13,21 @@ public:
     void Initialize(CMPUT350::GameContext* context) override;
     void Update(CMPUT350::GameContext* context) override;
     void LateUpdate(CMPUT350::GameContext* context) override;
-    bool HandleKeyEvent(CMPUT350::GameContext* context, char key) override;
     bool IsAlive() const override;
     void Kill() override;
 
     // Graphics Object Functions
     void RenderBackground(CMPUT350::GameContext* context) override;
     void RenderForeground(CMPUT350::GameContext* context) override;
+    CMPUT350::Point2D GetLocation() const override;
+    float GetRotation() const override;
 
 
     // Collision Object Functions
     void CollisionEnter(const std::shared_ptr<CMPUT350::CollisionObject>& obj) override;
     const CMPUT350::Rect& GetBounds() override;
+    //the follwing senctec is wroten by chatgpt: Returns the shapes that make up the enemy's collision area; the collision-processing stage uses this output to test the enemy against other CollisionObjects.
+    const std::vector<CMPUT350::Shape> &GetShapes() override;
 private:
     CMPUT350::Point2D mLocation;
     CMPUT350::Rect mBounds;

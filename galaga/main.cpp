@@ -84,9 +84,23 @@ public:
         return bounds;
     }
 
-    bool IsAlive() const override
-    {
+    bool IsAlive() const override{
         return mNumCollisions < 10;
+    }
+
+    CMPUT350::Point2D GetLocation() const override{
+        return mLoc;
+    }
+
+    float GetRotation() const override{
+        return 0.0f;
+    }
+
+    const std::vector<CMPUT350::Shape> &GetShapes() override
+    {
+        mShapes.clear();
+        mShapes.emplace_back(CMPUT350::Circle(CMPUT350::Point2D(0, 0),static_cast<float>(mRadius)));
+        return mShapes;
     }
 
     void RenderForeground(CMPUT350::GameContext* context) override
@@ -98,6 +112,7 @@ public:
     }
 
 private:
+    std::vector<CMPUT350::Shape> mShapes;
     static std::random_device rd;
     static std::mt19937 gen;
 
