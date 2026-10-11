@@ -14,6 +14,7 @@ class GameEngine;
 #include <SFML/Graphics.hpp>
 #include "DrawContext.h"
 #include "GameContext.h"
+#include "NotificationManager.h"
 
 namespace CMPUT350 {
 
@@ -40,12 +41,22 @@ public:
 
     void AddGameObject(std::shared_ptr<GameObject> gameObject) override;
 
+    void InstallKeyDownNotification(int key, const std::string& notification) override;
+    void InstallKeyUpNotification(int key, const std::string& notification) override;
+
+    const_iterator cbegin() const override;
+    const_iterator cend() const override;
+    const_iterator begin() const override;
+    const_iterator end() const override;
+
     void Run();
 
 private:
     std::shared_ptr<sf::RenderWindow> mWindow; // Shared SFML window used by the engine and drawing context
     std::shared_ptr<sf::Font> mFont; // Shared font resource
-    std::shared_ptr<DrawContext> mDrawContext; // Drawing interface used by game objects
+    std::shared_ptr<DrawContext> mScreenDrawContext;
+    std::shared_ptr<DrawContext> mGUIDrawContext;  
+    NotificationManager mNotificationManager;
     GameContext mGameContext; // Context passed to game objects during initialization, update, and rendering
 
     std::vector<std::shared_ptr<GameObject>> mGameObjects; // Game objects currently active in the engine

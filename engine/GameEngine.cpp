@@ -34,10 +34,16 @@ GameEngine::GameEngine(unsigned int width, unsigned int height, const std::strin
         fprintf(stderr, "WARNING: Font did not load.\n");
     }
 
-    mDrawContext = std::make_shared<DrawContext>(mWindow, mFont);
+    mScreenDrawContext = std::make_shared<DrawContext>(mWindow, mFont);
+    mGUIDrawContext = std::make_shared<DrawContext>(mWindow, mFont);
 
     mGameContext.mEngineView = this;
-    mGameContext.ScreenContext = mDrawContext.get();
+    mGameContext.ScreenContext = mScreenDrawContext.get();
+    mGameContext.GUIContext = mGUIDrawContext.get();
+
+    mGameContext.mNotificationManager = &mNotificationManager;
+
+    mGameContext.currentFrame = 0;
 }
 
 /**
@@ -64,6 +70,31 @@ GameEngine::~GameEngine() {
  */
 void GameEngine::AddGameObject(std::shared_ptr<GameObject> gameObject) {
     mNewGameObjects.push_back(gameObject);
+}
+
+// Temporary definitions for #11.
+// Real key-to-notification mapping will be implemented in #16.
+void GameEngine::InstallKeyDownNotification(int key, const std::string& notification)
+{
+}
+
+void GameEngine::InstallKeyUpNotification(int key, const std::string& notification)
+{
+}
+GameEngine::const_iterator GameEngine::begin() const {
+    return mGameObjects.cbegin();
+}
+
+GameEngine::const_iterator GameEngine::end() const {
+    return mGameObjects.cend();
+}
+
+GameEngine::const_iterator GameEngine::cbegin() const {
+    return mGameObjects.cbegin();
+}
+
+GameEngine::const_iterator GameEngine::cend() const {
+    return mGameObjects.cend();
 }
 
 /**
@@ -171,6 +202,9 @@ void GameEngine::Run() {
         for (auto &gameObject : mGameObjects) {
             auto graphicsObject = std::dynamic_pointer_cast<GraphicsObject>(gameObject);
             if (graphicsObject != nullptr) {
+                // Reset the gameplay drawing context after object rendering
+                mScreenDrawContext->SetContextOffset(graphicsObject->GetLocation());
+                mScreenDrawContext->SetContextRotation(graphicsObject->GetRotation());
                 graphicsObject->RenderBackground(&mGameContext);
             }
         }
@@ -179,6 +213,9 @@ void GameEngine::Run() {
         for (auto &gameObject : mGameObjects) {
             auto graphicsObject = std::dynamic_pointer_cast<GraphicsObject>(gameObject);
             if (graphicsObject != nullptr) {
+                // Reset the gameplay drawing context after object rendering
+                mScreenDrawContext->SetContextOffset(graphicsObject->GetLocation());
+                mScreenDrawContext->SetContextRotation(graphicsObject->GetRotation());
                 graphicsObject->RenderForeground(&mGameContext);
             }
         }

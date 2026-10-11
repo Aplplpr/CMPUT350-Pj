@@ -4,6 +4,9 @@
 #include "DrawContext.h"
 #include "EngineView.h"
 #include "GameObject.h"
+#include "NotificationManager.h"
+
+#include <memory>
 
 namespace CMPUT350 {
 
@@ -11,6 +14,13 @@ class GameContext {
 public:
     EngineView *mEngineView;
     DrawContext *ScreenContext;
+    DrawContext *GUIContext;
+
+    std::weak_ptr<GameObject> CurrObject;
+
+    NotificationManager *mNotificationManager;
+
+    int currentFrame;
 };
 
 }  // namespace CMPUT350
