@@ -72,14 +72,14 @@ void GameEngine::AddGameObject(std::shared_ptr<GameObject> gameObject) {
     mNewGameObjects.push_back(gameObject);
 }
 
-// Temporary definitions for #11.
-// Real key-to-notification mapping will be implemented in #16.
 void GameEngine::InstallKeyDownNotification(int key, const std::string& notification)
 {
+    mKeyDownNotifications[key].push_back(notification);
 }
 
 void GameEngine::InstallKeyUpNotification(int key, const std::string& notification)
 {
+    mKeyUpNotifications[key].push_back(notification);
 }
 GameEngine::const_iterator GameEngine::begin() const {
     return mGameObjects.cbegin();
@@ -136,6 +136,24 @@ void GameEngine::Run() {
         while (const std::optional event = mWindow->pollEvent()) {
             if (event->is<sf::Event::Closed>()) {
                 mWindow->close();
+            }
+            else if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
+                int key = static_cast<int>(keyPressed->scancode);
+                auto it = mKeyDownNotifications.find(key);
+                if (it != mKeyDownNotifications.end()) {
+                    for (const std::string& notification : it->second) {
+                        mNotificationManager.Notify(notification);
+                    }
+                }
+            }
+            else if (const auto* keyReleased = event->getIf<sf::Event::KeyReleased>()) {
+                int key = static_cast<int>(keyReleased->scancode);
+                auto it = mKeyUpNotifications.find(key);
+                if (it != mKeyUpNotifications.end()) {
+                    for (const std::string& notification : it->second) {
+                        mNotificationManager.Notify(notification);
+                    }
+                }
             }
         }
 

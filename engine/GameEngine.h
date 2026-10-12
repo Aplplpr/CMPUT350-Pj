@@ -3,6 +3,8 @@
 #define GAMEENGINE_H
 
 #include <vector>
+#include <unordered_map>
+#include <string>
 
 namespace CMPUT350 {
 class GameEngine;
@@ -62,6 +64,8 @@ private:
     std::vector<std::shared_ptr<GameObject>> mGameObjects; // Game objects currently active in the engine
     std::vector<std::shared_ptr<GameObject>> mNewGameObjects; // Game objects waiting to be activated at the start of the next frame
     
+    std::unordered_map<int, std::vector<std::string>> mKeyDownNotifications;
+    std::unordered_map<int, std::vector<std::string>> mKeyUpNotifications;
 };
 
 }  // namespace CMPUT350
