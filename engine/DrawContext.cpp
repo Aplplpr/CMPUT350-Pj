@@ -79,7 +79,7 @@ void DrawContext::DrawCircle(Point2D p, float radius, RGBColor c) {
 
     sf::CircleShape circle(radius);
     circle.setFillColor(sf::Color(c.r, c.g, c.b));
-    circle.setPosition({p.x - radius, p.y - radius}); //top left corner
+    circle.setPosition({transformedP.x - radius, transformedP.y - radius}); //top left corner
     mWindow->draw(circle);
 }
 
