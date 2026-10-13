@@ -39,6 +39,6 @@ public:
     virtual const Rect &GetBounds() = 0;
     virtual const std::vector<Shape> &GetShapes() = 0;
 };
-}  // namespace CMPUT350
+} 
 
 #endif

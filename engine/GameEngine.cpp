@@ -485,8 +485,8 @@ void GameEngine::Run() {
                     continue;
                 }
 
-                Rect boundsA = TransformCollisionRect(objA->GetBounds(), objA);
-                Rect boundsB = TransformCollisionRect(objB->GetBounds(), objB);
+                Rect boundsA = objA->GetBounds();
+                Rect boundsB = objB->GetBounds();
 
                 float aLeft = boundsA.topLeft.x;
                 float aRight = boundsA.topLeft.x + boundsA.width;
