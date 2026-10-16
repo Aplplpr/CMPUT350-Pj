@@ -20,3 +20,13 @@ destroyed, the game advances to the next level. If the player dies but still has
 game waits before respawning the player.
 5. GameOver: When the player runs out of lives, the game displays the Game Over message.
 After 150 frames, the game resets to Waiting.
+
+
+Siqi:
+I mainly worked on the engine-side systems, including GameContext and EngineView integration, DrawContext transformations, keyboard notification mapping, object iteration, and the advanced collision system. I also connected these systems together in the main GameEngine loop.
+
+For some of the implementation choices, I kept collision points in world space while doing collision checks, and only converted them back into each object's local coordinates when calling CollisionEnter. I first use the transformed bounding boxes to quickly rule out objects that are clearly not colliding. If the bounding boxes overlap, the engine then checks the actual Line, Circle, or Rect collision shapes to determine whether a real collision occurred. For object cleanup, I kept the same approach we used in the earlier version of the engine, where living objects are moved to the front of the vector and the vector is resized once instead of erasing dead objects one by one.
+
+Ai usage:
+As a team, Liam and I used ChatGPT to help us read through the project requirements and plan the overall implementation. We also used AI when discussing how to divide the work so that our two parts could be developed relatively independently and then integrated together.
+During my individual development, I mainly used ChatGPT to help debug compilation and runtime issues, understand local and world coordinate transformations.AI also helped me catch a missing edge case in the Line–Rect collision logic. A line can start inside, or even stay completely inside, a rectangle without crossing any of its edges, so I added a PointInRect check to make sure this case is still detected. I also used AI to help with code comments.
