@@ -24,10 +24,10 @@ public:
         int key,
         const std::string& notification) = 0;
 
-    virtual const_iterator cbegin() const = 0;
-    virtual const_iterator cend() const = 0;
-    virtual const_iterator begin() const = 0;
-    virtual const_iterator end() const = 0;
+    virtual const_iterator cbegin() const = 0; //Returns a constant iterator to the beginning of the active objects
+    virtual const_iterator cend() const = 0; //Returns a constant iterator past the end of the active objects
+    virtual const_iterator begin() const = 0; //Returns a read-only iterator to the beginning of the active objects
+    virtual const_iterator end() const = 0; //Returns a read-only iterator to the end of the active objects
 };
 
 }  // namespace CMPUT350
