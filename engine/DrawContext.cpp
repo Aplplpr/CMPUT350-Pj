@@ -1,4 +1,6 @@
 #include "DrawContext.h"
+#include <algorithm>
+#include <cmath>
 
 namespace CMPUT350 {
 
@@ -10,8 +12,7 @@ namespace CMPUT350 {
  *
  * AI-generated documentation.
  */
-DrawContext::DrawContext(std::shared_ptr<sf::RenderWindow> window, std::shared_ptr<sf::Font> font)
-    : mWindow(window), mFont(font) {}
+DrawContext::DrawContext(std::shared_ptr<sf::RenderWindow> window, std::shared_ptr<sf::Font> font): mWindow(window), mFont(font), mContextOffset(0, 0), mContextRotation(0.0f) {}
 
 /**
  * @brief Draws text centered at the given position.
@@ -34,7 +35,10 @@ void DrawContext::DrawCenteredText(const std::string &text, int pixelSize, Point
         bounds.position.y + bounds.size.y / 2.0f
     });
 
-    drawable.setPosition({p.x, p.y});
+    Point2D transformedP = Transform(p);
+
+    drawable.setPosition({transformedP.x, transformedP.y});
+    drawable.setRotation(sf::radians(mContextRotation));
 
     mWindow->draw(drawable);
 }
@@ -52,7 +56,12 @@ void DrawContext::DrawCenteredText(const std::string &text, int pixelSize, Point
 void DrawContext::DrawText(const std::string &text, int pixelSize, Point2D p, RGBColor c) {
     sf::Text drawable(*mFont, text, pixelSize);
     drawable.setFillColor(sf::Color(c.r, c.g, c.b));
-    drawable.setPosition({p.x, p.y});
+
+    Point2D transformedP = Transform(p);
+
+    drawable.setPosition({transformedP.x, transformedP.y});
+    drawable.setRotation(sf::radians(mContextRotation));
+
     mWindow->draw(drawable);
 }
 
@@ -66,9 +75,11 @@ void DrawContext::DrawText(const std::string &text, int pixelSize, Point2D p, RG
  * AI-generated documentation.
  */
 void DrawContext::DrawCircle(Point2D p, float radius, RGBColor c) {
+    Point2D transformedP = Transform(p);
+
     sf::CircleShape circle(radius);
     circle.setFillColor(sf::Color(c.r, c.g, c.b));
-    circle.setPosition({p.x - radius, p.y - radius}); //top left corner
+    circle.setPosition({transformedP.x - radius, transformedP.y - radius}); //top left corner
     mWindow->draw(circle);
 }
 
@@ -81,8 +92,30 @@ void DrawContext::DrawCircle(Point2D p, float radius, RGBColor c) {
  * AI-generated documentation.
  */
 void DrawContext::DrawRect(Rect r, RGBColor c) {
-    sf::RectangleShape rect(sf::Vector2f(r.width, r.height));
-    rect.setPosition({r.topLeft.x, r.topLeft.y});
+    Point2D p1 = Transform(r.topLeft);
+
+    Point2D p2 = Transform(Point2D(
+        r.topLeft.x + r.width,
+        r.topLeft.y
+    ));
+
+    Point2D p3 = Transform(Point2D(
+        r.topLeft.x + r.width,
+        r.topLeft.y + r.height
+    ));
+
+    Point2D p4 = Transform(Point2D(
+        r.topLeft.x,
+        r.topLeft.y + r.height
+    ));
+
+    sf::ConvexShape rect;
+    rect.setPointCount(4);
+
+    rect.setPoint(0, {p1.x, p1.y});
+    rect.setPoint(1, {p2.x, p2.y});
+    rect.setPoint(2, {p3.x, p3.y});
+    rect.setPoint(3, {p4.x, p4.y});
     rect.setFillColor(sf::Color(c.r, c.g, c.b));
     mWindow->draw(rect);
 }
@@ -97,12 +130,27 @@ void DrawContext::DrawRect(Rect r, RGBColor c) {
  * AI-generated documentation.
  */
 void DrawContext::FrameRect(Rect r, float width, RGBColor c) {
-    sf::RectangleShape rect(sf::Vector2f(r.width, r.height));
-    rect.setPosition({r.topLeft.x, r.topLeft.y});
-    rect.setFillColor(sf::Color::Transparent);
-    rect.setOutlineColor(sf::Color(c.r, c.g, c.b));
-    rect.setOutlineThickness(width);
-    mWindow->draw(rect);
+    Point2D p1 = r.topLeft;
+
+    Point2D p2(
+        r.topLeft.x + r.width,
+        r.topLeft.y
+    );
+
+    Point2D p3(
+        r.topLeft.x + r.width,
+        r.topLeft.y + r.height
+    );
+
+    Point2D p4(
+        r.topLeft.x,
+        r.topLeft.y + r.height
+    );
+
+    DrawLine(p1, p2, width, c); //DrawLine will transform the points
+    DrawLine(p2, p3, width, c);
+    DrawLine(p3, p4, width, c);
+    DrawLine(p4, p1, width, c);
 }
 
 /**
@@ -120,6 +168,9 @@ void DrawContext::FrameRect(Rect r, float width, RGBColor c) {
  * AI-generated documentation.
  */
 void DrawContext::DrawLine(Point2D from, Point2D to, float width, RGBColor c) {
+    from = Transform(from);
+    to = Transform(to);
+
     float dx = to.x - from.x;
     float dy = to.y - from.y;
 
@@ -145,6 +196,114 @@ void DrawContext::DrawLine(Point2D from, Point2D to, float width, RGBColor c) {
     line.setFillColor(sf::Color(c.r, c.g, c.b));
 
     mWindow->draw(line);
+}
+
+/**
+ * @brief Sets the translation offset used by the drawing context.
+ *
+ * @param p The world-space position used as the current context offset.
+ *
+ * The offset is applied after rotation when local points are transformed
+ * into world coordinates.
+ *
+ * AI-generated documentation.
+ */
+void DrawContext::SetContextOffset(Point2D p) {
+    mContextOffset = p;
+}
+
+/**
+ * @brief Sets the rotation used by the drawing context.
+ *
+ * @param rotation The rotation angle in radians.
+ *
+ * The rotation is applied to local coordinates before the context offset
+ * is added.
+ *
+ * AI-generated documentation.
+ */
+void DrawContext::SetContextRotation(float rotation) {
+    mContextRotation = rotation;
+}
+
+/**
+ * @brief Converts a point from local coordinates to world coordinates.
+ *
+ * @param p The point in local object coordinates.
+ * @return The transformed point in world coordinates.
+ *
+ * The point is first rotated around the local origin and then translated
+ * by the current context offset.
+ *
+ * AI-generated documentation.
+ */
+Point2D DrawContext::Transform(Point2D p) {
+    float cosRotation = std::cos(mContextRotation);
+    float sinRotation = std::sin(mContextRotation);
+
+    float x = p.x * cosRotation - p.y * sinRotation;
+    float y = p.x * sinRotation + p.y * cosRotation;
+
+    return Point2D(x + mContextOffset.x, y + mContextOffset.y);
+}
+
+/**
+ * @brief Converts a point from world coordinates back to local coordinates.
+ *
+ * @param p The point in world coordinates.
+ * @return The corresponding point in local object coordinates.
+ *
+ * This reverses the context translation and rotation applied by Transform().
+ *
+ * AI-generated documentation.
+ */
+Point2D DrawContext::ReverseTransform(Point2D p) {
+    float x = p.x - mContextOffset.x;
+    float y = p.y - mContextOffset.y;
+
+    float cosRotation = std::cos(mContextRotation);
+    float sinRotation = std::sin(mContextRotation);
+
+    float localX = x * cosRotation + y * sinRotation;
+    float localY = -x * sinRotation + y * cosRotation;
+
+    return Point2D(localX, localY);
+}
+
+/**
+ * @brief Transforms a local rectangle and returns its world-space bounding box.
+ *
+ * @param r The rectangle in local object coordinates.
+ * @return An axis-aligned rectangle containing all four transformed corners.
+ *
+ * Each corner is transformed using the current context rotation and offset,
+ * and the minimum and maximum coordinates are used to construct the result.
+ *
+ * AI-generated documentation.
+ */
+Rect DrawContext::Transform(Rect r) {
+    Point2D p1 = Transform(r.topLeft);
+
+    Point2D p2 = Transform(
+        Point2D(r.topLeft.x + r.width, r.topLeft.y)
+    );
+
+    Point2D p3 = Transform(
+        Point2D(r.topLeft.x + r.width,
+                r.topLeft.y + r.height)
+    );
+
+    Point2D p4 = Transform(
+        Point2D(r.topLeft.x,
+                r.topLeft.y + r.height)
+    );
+
+    float minX = std::min(std::min(p1.x, p2.x), std::min(p3.x, p4.x));
+    float maxX = std::max(std::max(p1.x, p2.x), std::max(p3.x, p4.x));
+    float minY = std::min(std::min(p1.y, p2.y), std::min(p3.y, p4.y));
+    float maxY = std::max(std::max(p1.y, p2.y), std::max(p3.y, p4.y));
+
+    return Rect(minX, minY, maxX - minX, maxY - minY);
 }
 
 int DrawContext::GetWindowWidth() { return mWindow->getSize().x; }

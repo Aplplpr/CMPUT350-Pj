@@ -3,6 +3,9 @@
 #define GAMEENGINE_H
 
 #include <vector>
+#include <unordered_map>
+#include <string>
+#include "CollisionObject.h"
 
 namespace CMPUT350 {
 class GameEngine;
@@ -14,6 +17,7 @@ class GameEngine;
 #include <SFML/Graphics.hpp>
 #include "DrawContext.h"
 #include "GameContext.h"
+#include "NotificationManager.h"
 
 namespace CMPUT350 {
 
@@ -40,17 +44,47 @@ public:
 
     void AddGameObject(std::shared_ptr<GameObject> gameObject) override;
 
+    void InstallKeyDownNotification(int key, const std::string& notification) override;
+    void InstallKeyUpNotification(int key, const std::string& notification) override;
+
+    const_iterator cbegin() const override;
+    const_iterator cend() const override;
+    const_iterator begin() const override;
+    const_iterator end() const override;
+
     void Run();
 
 private:
     std::shared_ptr<sf::RenderWindow> mWindow; // Shared SFML window used by the engine and drawing context
     std::shared_ptr<sf::Font> mFont; // Shared font resource
-    std::shared_ptr<DrawContext> mDrawContext; // Drawing interface used by game objects
+    std::shared_ptr<DrawContext> mScreenDrawContext;
+    std::shared_ptr<DrawContext> mGUIDrawContext;  
+    NotificationManager mNotificationManager;
     GameContext mGameContext; // Context passed to game objects during initialization, update, and rendering
 
     std::vector<std::shared_ptr<GameObject>> mGameObjects; // Game objects currently active in the engine
     std::vector<std::shared_ptr<GameObject>> mNewGameObjects; // Game objects waiting to be activated at the start of the next frame
     
+    std::unordered_map<int, std::vector<std::string>> mKeyDownNotifications;
+    std::unordered_map<int, std::vector<std::string>> mKeyUpNotifications;
+
+    Line TransformLine(const Line& line, const std::shared_ptr<CollisionObject>& object);
+    Circle TransformCircle(const Circle& circle, const std::shared_ptr<CollisionObject>& object);
+    Rect TransformCollisionRect(const Rect& rect, const std::shared_ptr<CollisionObject>& object);
+
+    //collisions
+    bool CircleCircleCollision(const Circle& a, const Circle& b);
+    bool LineLineCollision(const Line& a, const Line& b, Point2D& collisionPoint);
+    bool LineCircleCollision(const Line& line, const Circle& circle, Point2D& collisionPoint);
+    bool CircleRectCollision(const Circle& circle, const Rect& rect);
+    bool LineRectCollision(const Line& line, const Rect& rect, Point2D& collisionPoint);
+    bool PointInRect(const Point2D& point, const Rect& rect); //If line is within a rect completely. This case is suggested by ai.
+    bool PointInObjectRect(const Point2D& point, const Rect& rect, const std::shared_ptr<CollisionObject>& object);
+    std::vector<Point2D> GetRectCorners(const Rect& rect, const std::shared_ptr<CollisionObject>& object);
+    bool RectRectCollision(const Rect& rectA, const std::shared_ptr<CollisionObject>& objA, const Rect& rectB, const std::shared_ptr<CollisionObject>& objB);
+
+    bool ShapesCollide(const Shape& shapeA, const std::shared_ptr<CollisionObject>& objA, const Shape& shapeB, const std::shared_ptr<CollisionObject>& objB, bool& hasCollisionPoint, Point2D& collisionPoint);
+    Point2D WorldToLocal(const Point2D& point, const std::shared_ptr<CollisionObject>& object);
 };
 
 }  // namespace CMPUT350
