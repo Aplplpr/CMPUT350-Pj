@@ -198,14 +198,45 @@ void DrawContext::DrawLine(Point2D from, Point2D to, float width, RGBColor c) {
     mWindow->draw(line);
 }
 
+/**
+ * @brief Sets the translation offset used by the drawing context.
+ *
+ * @param p The world-space position used as the current context offset.
+ *
+ * The offset is applied after rotation when local points are transformed
+ * into world coordinates.
+ *
+ * AI-generated documentation.
+ */
 void DrawContext::SetContextOffset(Point2D p) {
     mContextOffset = p;
 }
 
+/**
+ * @brief Sets the rotation used by the drawing context.
+ *
+ * @param rotation The rotation angle in radians.
+ *
+ * The rotation is applied to local coordinates before the context offset
+ * is added.
+ *
+ * AI-generated documentation.
+ */
 void DrawContext::SetContextRotation(float rotation) {
     mContextRotation = rotation;
 }
 
+/**
+ * @brief Converts a point from local coordinates to world coordinates.
+ *
+ * @param p The point in local object coordinates.
+ * @return The transformed point in world coordinates.
+ *
+ * The point is first rotated around the local origin and then translated
+ * by the current context offset.
+ *
+ * AI-generated documentation.
+ */
 Point2D DrawContext::Transform(Point2D p) {
     float cosRotation = std::cos(mContextRotation);
     float sinRotation = std::sin(mContextRotation);
@@ -216,6 +247,16 @@ Point2D DrawContext::Transform(Point2D p) {
     return Point2D(x + mContextOffset.x, y + mContextOffset.y);
 }
 
+/**
+ * @brief Converts a point from world coordinates back to local coordinates.
+ *
+ * @param p The point in world coordinates.
+ * @return The corresponding point in local object coordinates.
+ *
+ * This reverses the context translation and rotation applied by Transform().
+ *
+ * AI-generated documentation.
+ */
 Point2D DrawContext::ReverseTransform(Point2D p) {
     float x = p.x - mContextOffset.x;
     float y = p.y - mContextOffset.y;
@@ -229,6 +270,17 @@ Point2D DrawContext::ReverseTransform(Point2D p) {
     return Point2D(localX, localY);
 }
 
+/**
+ * @brief Transforms a local rectangle and returns its world-space bounding box.
+ *
+ * @param r The rectangle in local object coordinates.
+ * @return An axis-aligned rectangle containing all four transformed corners.
+ *
+ * Each corner is transformed using the current context rotation and offset,
+ * and the minimum and maximum coordinates are used to construct the result.
+ *
+ * AI-generated documentation.
+ */
 Rect DrawContext::Transform(Rect r) {
     Point2D p1 = Transform(r.topLeft);
 
