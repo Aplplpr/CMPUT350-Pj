@@ -1,0 +1,22 @@
+Liam:
+I mainly worked on the gameplay systems and several engine interfaces. I implemented line and circle geometry functions, cubic Bezier curves, and the NotificationManager, and updated the GameObject, GraphicsObject, and CollisionObject interfaces to support new rendering, collision, and notification systems. 
+I created three distinct enemy types with unique health values, attack trajectories, shooting patterns, and point rewards. Enemies travel along Bezier‑curve paths, and curve slope values determine their in‑motion rotation. I also built the core Galaga class to govern overall game flow, managing enemy waves, player lives, scoring, level progression, and game resets.
+
+For key design choices, I used state machines to manage both high‑level game flow and individual enemy behaviours, enabling clean transitions between enemy entry, formation, attack and return phases.
+To keep enemy movement speed consistent, I sampled Bezier curves to calculate path distances instead of directly modifying curve parameters. I applied weak_ptr within NotificationManager and bullet parent references to avoid unintended extension of game‑object lifespans.
+I also separated core game logic from visual rendering: the Galaga class handles game‑rule logic while GUIContext takes charge of on‑screen information display.
+
+AI:
+I have using ChatGPT to help me analyzing the Task questions, like help me removing useless and meaningless informations, and building bone structure of the programmer. This is very useful, cause too many irrelative informations would affects how we understand the questions, but ai can help us identifying the most important things. And we only need to think how to implement queries
+
+
+The Galaga class uses five main states:
+1. Waiting: The game waits for the player to press 5 to insert a coin and 1 to start.2. Startup: The game resets the score, lives, and level, then creates the player. After 60frames, it enters the Waves state.
+3. Waves: The game spawns five waves of eight enemies, for a total of 40 enemies. Each
+enemy follows a Bezier path to its formation position.
+4. Gameplay: After the enemies reach their formation, the game starts selecting enemies to
+attack. The player can move and shoot enemies to earn points. When all enemies are
+destroyed, the game advances to the next level. If the player dies but still has lives, the
+game waits before respawning the player.
+5. GameOver: When the player runs out of lives, the game displays the Game Over message.
+After 150 frames, the game resets to Waiting.
