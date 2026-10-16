@@ -38,6 +38,9 @@ public:
     virtual void CollisionEnter(const std::shared_ptr<CollisionObject> &obj, const Point2D &collisionPoint) {CollisionEnter(obj);}
     virtual const Rect &GetBounds() = 0;
     virtual const std::vector<Shape> &GetShapes() = 0;
+    virtual bool IsStatic() const {
+        return false;
+    }
 };
 } 
 

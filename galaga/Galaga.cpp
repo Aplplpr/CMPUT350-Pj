@@ -6,10 +6,13 @@
 #include "Stars.h"
 #include "Keyboard.h"
 
-Galaga::Galaga()
+Galaga::Galaga() : Galaga(768, 1024)
 {
 }
-
+Galaga::Galaga(int width, int height)
+    : mWidth(width), mHeight(height)
+{
+}
 void Galaga::Initialize(CMPUT350::GameContext* context)
 {
     mContext = context;
@@ -34,7 +37,7 @@ void Galaga::Initialize(CMPUT350::GameContext* context)
 void Galaga::Update(CMPUT350::GameContext* context)
 {
     if (!mStarsAdded){
-        context->mEngineView->AddGameObject(std::make_shared<Stars>( 250, CMPUT350::Rect(0, 0, 768, 1024)));
+        context->mEngineView->AddGameObject(std::make_shared<Stars>( 250, CMPUT350::Rect(0, 0, mWidth, mHeight)));
         mStarsAdded = true;
     }
     if (mState == State::Waiting){
@@ -150,9 +153,7 @@ void Galaga::SpawnPlayer()
     if (currentPlayer && currentPlayer->IsAlive()){
         return;
     }
-    auto player = std::make_shared<Player>(
-        CMPUT350::Point2D(384, 900)
-    );
+    auto player = std::make_shared<Player>(CMPUT350::Point2D(mWidth / 2.0f, mHeight - 124.0f));
     mPlayer = player;
     mContext->mEngineView->AddGameObject(player);
     mWaitingRespawn = false;
@@ -169,7 +170,7 @@ void Galaga::SpawnWave()
             start = CMPUT350::Point2D(-60, -80 - row * 30);
         }
         else{
-            start = CMPUT350::Point2D(828, -80 - row * 30);
+            start = CMPUT350::Point2D(mWidth + 60, -80 - row * 30);
         }
         float side = -90.0f;
         if (column % 2 != 0){
