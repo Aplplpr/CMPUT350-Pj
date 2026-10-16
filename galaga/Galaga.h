@@ -14,6 +14,7 @@ class Galaga : public CMPUT350::GameObject
 {
 public:
     Galaga();
+    Galaga(int width, int height);
     void Initialize(CMPUT350::GameContext* context) override;
     void Update(CMPUT350::GameContext* context) override;
     void RenderUI(CMPUT350::GameContext* context) override;
@@ -56,6 +57,8 @@ private:
     int mRespawnFrame = 0;
     bool mWaitingRespawn = false;
     bool mStarsAdded = false;
+    int mWidth = 768;
+    int mHeight = 1024;
 };
 
 #endif
